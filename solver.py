@@ -2,76 +2,86 @@
 class Solver:
    def begin_simple(self, array, shape="row"):
       values_left = [1,2,3,4,5,6,7,8,9]
+
+      values_done = self.get_complete(array, values_left)
+
+   def get_complete(self,cells, values_left):
       values_done = []
-      remaining = 9
+      for cell in cells:
+         if cell.has_value():
+            values_left.remove(cell.get_value())
+            values_done.append(cell.get_value())
+      return values_done
 
-      unknown = []
+      # values_left = [1,2,3,4,5,6,7,8,9]
+      # values_done = []
+      # remaining = 9
+
+      # unknown = []
 
 
-      for cell in array:
-         value = cell.getValue()
-         if value != 0:
-            try:
-               values_left.remove(value)
-            except ValueError:
-               print("="*80)
-               print(values_left)
-               print("TRIED REMOVING:", value)
+      # for cell in array:
+      #    value = cell.get_value()
+      #    if value != 0:
+      #       values_left.remove(value)
             
-            values_done.append(value)
-            remaining -=1
-         else:
-            unknown.append(cell)
-            # The value has already been found
-            pass
+      #       values_done.append(value)
+      #       remaining -=1
+      #    else:
+      #       unknown.append(cell)
+      #       # The value has already been found
+      #       pass
 
-      if remaining == 0:
-         # This section is complete
-         pass
-      else:
-         for cell in unknown:
-            for value in values_done:
-               cell.remove_number(value)
-         self.find_solos(unknown, remaining)
+      # if remaining == 0:
+      #    # This section is complete
+      #    pass
+      # else:
+      #    for cell in unknown:
+      #       for value in values_done:
+      #          cell.remove_number(value)
+      #    self.find_solos(unknown, remaining)
          # self.find_subset(unknown, remaining)
          
-   def find_solos(self,unknown, remaining):
+   # def find_solos(self,unknown, remaining):
 
-      combined = []
+   #    combined = []
 
-      for cell in unknown:
-         combined.extend(cell.numbers)
+   #    for cell in unknown:
+   #       combined.extend(cell.numbers)
 
-      solos = []
+   #    solos = []
 
-      for ii in range(1,10):
-         if combined.count(ii) == 1:
-            solos.append(ii)
+   #    for ii in range(1,10):
+   #       if combined.count(ii) == 1:
+   #          solos.append(ii)
 
-      for value in solos:
-         for cell in unknown:
-            if value in cell.numbers:
-               cell.setValue(value)
+   #    for value in solos:
+   #       print("-"*80)
+   #       for cell in unknown:
+   #          if value in cell.numbers:
+   #             print(cell.numbers,"=>", value)
+   #             cell.set_value(value)
+   #             pass
 
-   def find_subset(self, array, remaining):
-      subsets = []
-      for cell in array:
-         if cell.value == 0:
-            subsets.append(cell.numbers)
+   # def find_subset(self, array, remaining):
+   #    subsets = []
+   #    for cell in array:
+   #       if cell.value == 0:
+   #          subsets.append(cell.numbers)
 
-      subset_count = len(subsets)
+   #    subset_count = len(subsets)
 
-      # Direct subsets
+   #    # Direct subsets
 
-      for subset in subsets:
-         length = len(subset)
-         count = subsets.count(subset)
+   #    for subset in subsets:
+   #       length = len(subset)
+   #       count = subsets.count(subset)
 
-         if count == length:
-            for ii in range(subset_count):
-               if subset != subsets[ii]:
-                  for number in subset:
-                     array[ii].remove_number(number)
+   #       if count == length:
+   #          for ii in range(subset_count):
+   #             if subset != subsets[ii]:
+   #                for number in subset:
+   #                   array[ii].remove_number(number)
                      
       # Indirect subsets
 
