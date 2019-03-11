@@ -37,16 +37,15 @@ class Sudoku:
       self.gui = gui
       self.create_grid()
 
-      self.create_groups()
-
       self.update_gui()
       self.solver = Solver()
 
 
    def create_grid(self):
       self.grid = [[Cell() for ii in range(9)] for jj in range(9)]
+      self.create_groups()
 
-      self.small_labels = [[[None for kk in range(9)] for ii in range(9)] for jj in range(9) ]
+      self.small_labels = [[None for ii in range(9)] for jj in range(9)] 
 
       for ii in range(9):
          for jj in range(9):
@@ -63,19 +62,9 @@ class Sudoku:
       self.groups = []
       self.groups.extend(self.get_rows())
       self.groups.extend(self.get_cols())
-      self.groups.extend(self.get_sqrs())
+      self.groups.extend(self.get_boxes())
 
    def get_rows(self):
-   def remove_number(self, number):
-      if number in self.numbers:
-         self.numbers.remove(number)
-         self.remaining -=1
-         self.changed = True
-
-         if self.remaining == 1:
-            print(self.numbers)
-            self.set_value(self.numbers[0])
-
       groups = []
       for y in range(9):
          row = []
@@ -110,17 +99,8 @@ class Sudoku:
 
          group = Group(box, "box")
          groups.append(group)
-
-
-   def iterate_solve(self):
-
-      print("="*80)
-
-      self.solve_vertical()
-      self.solve_horizontal()
-      self.solve_square()
-
-      self.update_gui()
+      
+      return groups
 
    def solve_array(self, array, shape):
       if shape == "row" or shape == "column" or shape == "square":
@@ -148,7 +128,7 @@ class Group:
       self.type=type
 
       for cell in cells:
-         cell.set_group(self)
+         cell.add_group(self)
 
 class Cell:
    def __init__(self):
