@@ -1,12 +1,49 @@
 
 class Solver:
    def begin_simple(self, group):
-      self.single_occurange(group)
+      self.find_solos(group)
+      self.find_subsets(group)
       pass
 
-   def single_occurange(self, group):
-      remaining_values = group.remaining_values
+   def find_solos(self,group):
+
+      combined = []
+      solos = []
+
+      for cell in group.unknown_cells:
+         combined.extend(cell.get_possible_values())
+
+      for ii in range(1,10):
+         if combined.count(ii) == 1:
+            solos.append(ii)
+
+      for value in solos:
+         for cell in group.unknown_cells:
+            if value in cell.get_possible_values():
+               cell.set_value(value)
+
+   def find_subsets(self, group):
       
+      
+      
+      pass
+
+      # for cell in unknown:
+      #    combined.extend(cell.numbers)
+
+      # solos = []
+
+      # for ii in range(1,10):
+      #    if combined.count(ii) == 1:
+      #       solos.append(ii)
+
+      # for value in solos:
+      #    print("-"*80)
+      #    for cell in unknown:
+      #       if value in cell.numbers:
+      #          print(cell.numbers,"=>", value)
+      #          cell.set_value(value)
+      #          pass
 
       # values_left = [1,2,3,4,5,6,7,8,9]
       # values_done = []

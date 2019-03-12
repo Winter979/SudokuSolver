@@ -1,5 +1,6 @@
 
 from solver import Solver
+import copy
 
 class Sudoku:
 
@@ -26,12 +27,22 @@ class Sudoku:
    template = [[5,3,0,0,7,0,0,0,0],
                [6,0,0,1,9,0,0,0,0],
                [0,9,8,0,0,0,0,6,0],
-               [8,0,0,0,6,0,0,0,3],
+               [8,0,0,0,0,0,0,0,3],
                [0,0,0,0,0,3,0,0,1],
                [7,0,0,0,2,0,0,0,6],
                [0,6,0,0,0,0,2,8,0],
                [0,0,0,4,1,9,0,0,5],
                [0,0,0,0,8,0,0,7,9]]
+   
+   template1 = [[5,3,0,0,7,0,0,0,0],
+               [6,0,0,1,9,0,0,0,0],
+               [0,9,8,0,0,0,0,6,0],
+               [8,0,0,0,6,0,0,0,3],
+               [0,0,0,0,0,0,0,0,1],
+               [7,0,0,0,2,0,0,0,6],
+               [0,6,0,0,0,0,2,8,0],
+               [0,0,7,4,0,9,0,0,5],
+               [0,0,0,0,0,0,0,7,9]]
 
    def __init__(self, gui):
       self.gui = gui
@@ -40,12 +51,18 @@ class Sudoku:
       self.update_gui()
       self.solver = Solver()
 
+      self.group_count = 9+9+9
+      self.group_ii = 0
+
    def start_solve(self):
       self.gui.start(self.stepping_solve)
 
    def stepping_solve(self):
-      print("="*80)
-      print("Updating GUI")
+
+      print(self.group_ii)
+
+      self.solver.begin_simple(self.groups[self.group_ii])
+      self.group_ii = (self.group_ii +1 )% self.group_count
       self.update_gui()
       pass
 
@@ -117,37 +134,41 @@ class Sudoku:
       for x in range(9):
          for y in range(9):
             cell = self.grid[x][y]
-            if True:
+            if True: #Check if any changed have happened
                labels = self.small_labels[x][y]
                if labels != None:
                   for label in labels:
                      self.gui.remove_label(label)
 
                if cell.value == 0: # value not known. update the small numbers
-                  self.small_labels[x][y] =  self.gui.draw_small_number(x,y, cell.remaining_values)
+                  self.small_labels[x][y] =  self.gui.draw_small_number(x,y, cell.possible_values)
                else: # The value is known
                   self.gui.draw_number(x,y,cell.value)
-
 
 class Group:
    def __init__(self, cells, type):
       self.remaining = 9
-      self.remaining_values = [1,2,3,4,5,6,7,8,9]
-      self.unknown_cells = cells
+      self.possible_values = [1,2,3,4,5,6,7,8,9]
+      self.cells = cells
       self.type=type
 
       self.changed = False
 
+      self.unknown_cells = []
+
       for cell in cells:
+         self.unknown_cells.append(cell)
          cell.add_group(self)
+
+
 
    def new_cell_value(self, cell, value):
 
-      if value in self.remaining_values:
+      if value in self.possible_values:
          self.changed = True
 
          self.remaining -=1
-         self.remaining_values.remove(value)
+         self.possible_values.remove(value)
          self.unknown_cells.remove(cell)
 
          for unknown_cell in self.unknown_cells:
@@ -159,7 +180,7 @@ class Group:
 class Cell:
    def __init__(self):
       self.remaining = 9
-      self.remaining_values = [1,2,3,4,5,6,7,8,9]
+      self.possible_values = [1,2,3,4,5,6,7,8,9]
       self.value = 0
 
       self.groups = []
@@ -169,12 +190,12 @@ class Cell:
       self.groups.append(group)
 
    def remove_number(self, value):
-      if value in self.remaining_values:
-         self.remaining_values.remove(value)
+      if value in self.possible_values:
+         self.possible_values.remove(value)
          self.remaining -= 1
 
          if self.remaining == 1:
-            self.set_value(self.remaining_values[0])
+            self.set_value(self.possible_values[0])
 
    def set_value(self, value):
       self.changed = True
@@ -185,6 +206,8 @@ class Cell:
       for group in self.groups:
          group.new_cell_value(self, value)
 
+   def get_possible_values(self):
+      return self.possible_values
 
    def get_value(self):
       return self.value

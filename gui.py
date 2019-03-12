@@ -41,7 +41,7 @@ class Gui:
 
    def loop(self, callback):
       callback()
-      self.window.after(2000, self.loop, callback)
+      self.window.after(300, self.loop, callback)
 
 
 # ------------------------------------------------------------------------------
