@@ -3,7 +3,7 @@ from solver import Solver
 
 class Sudoku:
 
-   template = [[5,3,0,0,7,0,9,1,0],
+   template1 = [[5,3,0,0,7,0,9,1,0],
                [6,0,0,1,9,0,3,0,0],
                [1,9,8,3,4,2,5,6,7],
                [8,0,9,7,6,0,4,0,3],
@@ -13,7 +13,7 @@ class Sudoku:
                [2,8,7,4,1,9,6,3,5],
                [3,0,0,0,8,0,1,7,9]]
    
-   template2 = [[5,3,0,0,7,0,9,1,0],
+   template1 = [[5,3,0,0,7,0,9,1,0],
                [6,0,0,1,9,0,3,0,0],
                [1,9,8,0,0,0,0,6,7],
                [8,0,9,7,6,0,0,0,3],
@@ -23,7 +23,7 @@ class Sudoku:
                [2,8,7,4,1,9,6,3,5],
                [3,0,0,0,8,0,1,7,9]]
 
-   template0 = [[5,3,0,0,7,0,0,0,0],
+   template = [[5,3,0,0,7,0,0,0,0],
                [6,0,0,1,9,0,0,0,0],
                [0,9,8,0,0,0,0,6,0],
                [8,0,0,0,6,0,0,0,3],
@@ -40,11 +40,21 @@ class Sudoku:
       self.update_gui()
       self.solver = Solver()
 
+   def start_solve(self):
+      self.gui.start(self.stepping_solve)
+
+   def stepping_solve(self):
+      print("="*80)
+      print("Updating GUI")
+      self.update_gui()
+      pass
 
    def create_grid(self):
+      # Create the grid and setup the groups
       self.grid = [[Cell() for ii in range(9)] for jj in range(9)]
       self.create_groups()
 
+      # Setup for the small labels
       self.small_labels = [[None for ii in range(9)] for jj in range(9)] 
 
       for ii in range(9):
@@ -60,8 +70,11 @@ class Sudoku:
 
    def create_groups(self):
       self.groups = []
+      print("Creating Rows")
       self.groups.extend(self.get_rows())
+      print("Creating Cols")
       self.groups.extend(self.get_cols())
+      print("Creating Boxes")
       self.groups.extend(self.get_boxes())
 
    def get_rows(self):
@@ -87,48 +100,61 @@ class Sudoku:
       return groups
 
    def get_boxes(self):
-
       groups = []
-
       for ii in range(9):
          box = []
          for jj in range(9):
             x = jj % 3 + ii % 3 *3
             y = jj // 3 + ii // 3 *3
-            box[jj] = self.grid[x][y]
-
+            box.append(self.grid[x][y])
          group = Group(box, "box")
          groups.append(group)
       
       return groups
 
-   def solve_array(self, array, shape):
-      if shape == "row" or shape == "column" or shape == "square":
-         self.solver.begin_simple(array, shape)
-
-   def update_gui(self):   
+   def update_gui(self):
+      pass   
       for x in range(9):
          for y in range(9):
             cell = self.grid[x][y]
-            if cell.changed:
-               for label in self.small_labels[x][y]:
-                  self.gui.remove_label(label)
+            if True:
+               labels = self.small_labels[x][y]
+               if labels != None:
+                  for label in labels:
+                     self.gui.remove_label(label)
 
                if cell.value == 0: # value not known. update the small numbers
-                  self.small_labels[x][y] =  self.gui.draw_small_number(x,y, cell.numbers)
+                  self.small_labels[x][y] =  self.gui.draw_small_number(x,y, cell.remaining_values)
                else: # The value is known
-                  self.gui.draw_number(x,y,cell.value)  
-               cell.changed = False
+                  self.gui.draw_number(x,y,cell.value)
+
 
 class Group:
    def __init__(self, cells, type):
       self.remaining = 9
       self.remaining_values = [1,2,3,4,5,6,7,8,9]
-      self.cells = cells
+      self.unknown_cells = cells
       self.type=type
+
+      self.changed = False
 
       for cell in cells:
          cell.add_group(self)
+
+   def new_cell_value(self, cell, value):
+
+      if value in self.remaining_values:
+         self.changed = True
+
+         self.remaining -=1
+         self.remaining_values.remove(value)
+         self.unknown_cells.remove(cell)
+
+         for unknown_cell in self.unknown_cells:
+            unknown_cell.remove_number(value)
+
+   def has_changed(self):
+      return self.changed
 
 class Cell:
    def __init__(self):
@@ -139,19 +165,16 @@ class Cell:
       self.groups = []
       self.changed = False
 
-
    def add_group(self, group):
-      self.group = group
+      self.groups.append(group)
 
-   # def remove_number(self, number):
-   #    if number in self.numbers:
-   #       self.numbers.remove(number)
-   #       self.remaining -=1
-   #       self.changed = True
+   def remove_number(self, value):
+      if value in self.remaining_values:
+         self.remaining_values.remove(value)
+         self.remaining -= 1
 
-   #       if self.remaining == 1:
-   #          print(self.numbers)
-   #          self.set_value(self.numbers[0])
+         if self.remaining == 1:
+            self.set_value(self.remaining_values[0])
 
    def set_value(self, value):
       self.changed = True
@@ -159,8 +182,15 @@ class Cell:
       self.remaining = 0
       self.numbers = []
 
+      for group in self.groups:
+         group.new_cell_value(self, value)
+
+
    def get_value(self):
       return self.value
 
    def has_value(self):
       return self.value != 0
+
+   def has_changed(self):
+      return self.changed

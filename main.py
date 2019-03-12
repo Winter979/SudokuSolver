@@ -9,7 +9,7 @@ def main():
 
    sudoku = Sudoku(gui)
 
-   gui.start(sudoku.iterate_solve)
+   sudoku.start_solve()
 
 if __name__ == "__main__":
    main()

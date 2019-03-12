@@ -1,17 +1,12 @@
 
 class Solver:
-   def begin_simple(self, array, shape="row"):
-      values_left = [1,2,3,4,5,6,7,8,9]
+   def begin_simple(self, group):
+      self.single_occurange(group)
+      pass
 
-      values_done = self.get_complete(array, values_left)
-
-   def get_complete(self,cells, values_left):
-      values_done = []
-      for cell in cells:
-         if cell.has_value():
-            values_left.remove(cell.get_value())
-            values_done.append(cell.get_value())
-      return values_done
+   def single_occurange(self, group):
+      remaining_values = group.remaining_values
+      
 
       # values_left = [1,2,3,4,5,6,7,8,9]
       # values_done = []
